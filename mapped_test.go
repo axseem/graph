@@ -31,7 +31,7 @@ func TestAdjacency(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			g := graph.NewSimple[int]()
+			g := graph.NewMapped[int]()
 			g.AddVertex(0)
 			g.AddVertex(1)
 			g.AddEdge(0, 1)
@@ -44,10 +44,18 @@ func TestAdjacency(t *testing.T) {
 	}
 }
 
+func BenchmarkMappedGrow(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		g := graph.NewMapped[int]()
+		g.Grow(4096)
+	}
+}
+
 func BenchmarkSimpleAdd4096Vertices(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		g := graph.NewSimple[int]()
-		for i := range 4096 {
+		const l = 4096
+		g := graph.NewMapped[int]()
+		for i := range l {
 			if err := g.AddVertex(i); err != nil {
 				b.Error(err)
 			}
@@ -57,9 +65,9 @@ func BenchmarkSimpleAdd4096Vertices(b *testing.B) {
 
 func BenchmarkSimpleGrowAdd4096Vertices(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		g := graph.NewSimple[int]()
-		g.Grow(4096)
-		for j := range 4096 {
+		const l = 4096
+		g := graph.NewMapped[int]()
+		for j := range l {
 			if err := g.AddVertex(j); err != nil {
 				b.Error(err)
 			}
@@ -70,16 +78,17 @@ func BenchmarkSimpleGrowAdd4096Vertices(b *testing.B) {
 func BenchmarkSimpleAdd4096Edges(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		b.StopTimer()
-		g := graph.NewSimple[int]()
-		g.Grow(4097)
-		for i := range 4097 {
+		const l = 4097
+		g := graph.NewMapped[int]()
+		g.Grow(l)
+		for i := range l {
 			if err := g.AddVertex(i); err != nil {
 				b.Error(err)
 			}
 		}
 		b.StartTimer()
 
-		for i := 1; i < 4097; i++ {
+		for i := 1; i < l; i++ {
 			if err := g.AddEdge(0, i); err != nil {
 				b.Error(err)
 			}
@@ -89,24 +98,25 @@ func BenchmarkSimpleAdd4096Edges(b *testing.B) {
 
 func BenchmarkSimple(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		g := graph.NewSimple[int]()
-		for i := range 4097 {
+		const l = 4097
+		g := graph.NewMapped[int]()
+		for i := range l {
 			if err := g.AddVertex(i); err != nil {
 				b.Error(err)
 			}
 		}
 
-		for i := 1; i < 4097; i++ {
+		for i := 1; i < l; i++ {
 			if err := g.AddEdge(0, i); err != nil {
 				b.Error(err)
 			}
 		}
 
-		for i := 0; i < 4097; i += 2 {
+		for i := 0; i < l; i += 2 {
 			g.DeleteVertex(i)
 		}
 
-		for i := 1; i < 4097; i += 2 {
+		for i := 1; i < l; i += 2 {
 			g.DeleteEdge(0, i)
 		}
 
