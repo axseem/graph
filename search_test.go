@@ -9,67 +9,67 @@ import (
 
 func TestDFS(t *testing.T) {
 	testCases := []struct {
-		desc   string
-		order  uint
-		edges  [][2]int
-		entry  int
-		output []int
+		desc     string
+		vertices []int
+		edges    [][2]int
+		entry    int
+		output   []int
 	}{
 		{
-			desc:   "empty graph",
-			order:  0,
-			edges:  nil,
-			entry:  0,
-			output: nil,
+			desc:     "empty graph",
+			vertices: []int{},
+			edges:    nil,
+			entry:    0,
+			output:   nil,
 		},
 		{
-			desc:   "trivial graph",
-			order:  1,
-			edges:  nil,
-			entry:  0,
-			output: []int{0},
+			desc:     "trivial graph",
+			vertices: []int{1},
+			edges:    nil,
+			entry:    0,
+			output:   []int{0},
 		},
 		{
-			desc:   "null graph",
-			order:  2,
-			edges:  nil,
-			entry:  0,
-			output: []int{0},
+			desc:     "null graph",
+			vertices: []int{1, 2},
+			edges:    nil,
+			entry:    0,
+			output:   []int{0},
 		},
 		{
-			desc:   "graph:0→1",
-			order:  2,
-			edges:  [][2]int{{0, 1}},
-			entry:  0,
-			output: []int{0, 1},
+			desc:     "graph:0→1",
+			vertices: []int{1, 2},
+			edges:    [][2]int{{0, 1}},
+			entry:    0,
+			output:   []int{0, 1},
 		},
 		{
-			desc:   "graph:0←1",
-			order:  2,
-			edges:  [][2]int{{1, 0}},
-			entry:  0,
-			output: []int{0},
+			desc:     "graph:0←1",
+			vertices: []int{1, 2},
+			edges:    [][2]int{{1, 0}},
+			entry:    0,
+			output:   []int{0},
 		},
 		{
-			desc:   "2 vertices cycled undirected graph",
-			order:  2,
-			edges:  [][2]int{{0, 1}, {1, 0}},
-			entry:  0,
-			output: []int{0, 1},
+			desc:     "2 vertices cycled undirected graph",
+			vertices: []int{1, 2},
+			edges:    [][2]int{{0, 1}, {1, 0}},
+			entry:    0,
+			output:   []int{0, 1},
 		},
 		{
-			desc:   "3 vertices cycled directed graph",
-			order:  3,
-			edges:  [][2]int{{0, 1}, {1, 2}, {2, 0}},
-			entry:  0,
-			output: []int{0, 1, 2},
+			desc:     "3 vertices cycled directed graph",
+			vertices: []int{1, 2, 2},
+			edges:    [][2]int{{0, 1}, {1, 2}, {2, 0}},
+			entry:    0,
+			output:   []int{0, 1, 2},
 		},
 		{
-			desc:   "graph:2←1←0→3→4",
-			order:  7,
-			edges:  [][2]int{{1, 2}, {0, 1}, {0, 3}, {3, 4}},
-			entry:  0,
-			output: []int{0, 1, 2, 3, 4},
+			desc:     "graph:2←1←0→3→4",
+			vertices: []int{1, 2, 3, 4, 5, 6, 7},
+			edges:    [][2]int{{1, 2}, {0, 1}, {0, 3}, {3, 4}},
+			entry:    0,
+			output:   []int{0, 1, 2, 3, 4},
 		},
 	}
 
@@ -77,16 +77,12 @@ func TestDFS(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			g := graph.NewMapped[int]()
 
-			for i := range int(tC.order) {
-				if err := g.AddVertex(i); err != nil {
-					panic(err)
-				}
+			if err := g.AddVertices(tC.vertices...); err != nil {
+				panic(err)
 			}
 
-			for _, e := range tC.edges {
-				if err := g.AddEdge(e[0], e[1]); err != nil {
-					panic(err)
-				}
+			if err := g.AddEdges(tC.edges...); err != nil {
+				panic(err)
 			}
 
 			output := graph.DFS(g, tC.entry)
@@ -103,19 +99,19 @@ func BenchmarkDFS1024Vertices8Branches(b *testing.B) {
 	g := graph.NewMapped[int]()
 
 	for i := range l {
-		g.AddVertex(i)
+		g.AddVertices(i)
 	}
 
 	for i := 0; i < branches; i++ {
 		for j := i * (l / branches); j < (i+1)*(l/branches); j++ {
 			if i != j {
-				if err := g.AddEdge(i, j); err != nil {
+				if err := g.AddEdges([2]int{i, j}); err != nil {
 					panic(err)
 				}
 			}
 		}
 	}
-	g.AddEdge(l, 0)
+	g.AddEdges([2]int{l, 0})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -132,19 +128,19 @@ func BenchmarkDFS1024Vertices512Branches(b *testing.B) {
 	g := graph.NewMapped[int]()
 
 	for i := range l {
-		g.AddVertex(i)
+		g.AddVertices(i)
 	}
 
 	for i := 0; i < branches; i++ {
 		for j := i * (l / branches); j < (i+1)*(l/branches); j++ {
 			if i != j {
-				if err := g.AddEdge(i, j); err != nil {
+				if err := g.AddEdges([2]int{i, j}); err != nil {
 					panic(err)
 				}
 			}
 		}
 	}
-	g.AddEdge(l, 0)
+	g.AddEdges([2]int{l, 0})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -161,19 +157,19 @@ func BenchmarkBFS1024Vertices8Branches(b *testing.B) {
 	branches := 8
 
 	for i := range l {
-		g.AddVertex(i)
+		g.AddVertices(i)
 	}
 
 	for i := 0; i < branches; i++ {
 		for j := i * (l / branches); j < (i+1)*(l/branches); j++ {
 			if i != j {
-				if err := g.AddEdge(i, j); err != nil {
+				if err := g.AddEdges([2]int{i, j}); err != nil {
 					panic(err)
 				}
 			}
 		}
 	}
-	g.AddEdge(l, 0)
+	g.AddEdges([2]int{l, 0})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -190,19 +186,19 @@ func BenchmarkBFS1024Vertices512Branches(b *testing.B) {
 	branches := 512
 
 	for i := range l {
-		g.AddVertex(i)
+		g.AddVertices(i)
 	}
 
 	for i := 0; i < branches; i++ {
 		for j := i * (l / branches); j < (i+1)*(l/branches); j++ {
 			if i != j {
-				if err := g.AddEdge(i, j); err != nil {
+				if err := g.AddEdges([2]int{i, j}); err != nil {
 					panic(err)
 				}
 			}
 		}
 	}
-	g.AddEdge(l, 0)
+	g.AddEdges([2]int{l, 0})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
