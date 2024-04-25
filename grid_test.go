@@ -53,6 +53,12 @@ func TestGridAdjacency(t *testing.T) {
 			result:   [][2]int{{0, 1}, {1, 0}, {0, -1}, {-1, 0}, {1, 1}},
 		},
 		{
+			desc:        "delete edge",
+			entry:       [2]int{0, 0},
+			deleteEdges: [][2][2]int{{{0, 0}, {-1, 0}}},
+			result:      [][2]int{{0, 1}, {1, 0}, {0, -1}},
+		},
+		{
 			desc:           "nil vertex",
 			entry:          [2]int{0, 0},
 			deleteVertices: [][2]int{{0, 0}},
@@ -67,20 +73,16 @@ func TestGridAdjacency(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			g := graph.NewGrid()
+			var g = graph.NewGrid()
 
-			for _, v := range tC.deleteVertices {
-				g.DeleteVertex(v)
+			g.DeleteVertices(tC.deleteVertices...)
+			if err := g.AddVertices(tC.addVertices...); err != nil {
+				t.Error(err)
 			}
-			for _, v := range tC.addVertices {
-				g.AddVertex(v)
+			if err := g.AddEdges(tC.addEdges...); err != nil {
+				t.Error(err)
 			}
-			for _, e := range tC.addEdges {
-				g.AddEdge(e[0], e[1])
-			}
-			for _, e := range tC.deleteEdges {
-				g.DeleteEdge(e[0], e[1])
-			}
+			g.DeleteEdges(tC.deleteEdges...)
 
 			n := g.Adjacency(tC.entry)
 			if !reflect.DeepEqual(n, tC.result) {
@@ -90,10 +92,95 @@ func TestGridAdjacency(t *testing.T) {
 	}
 }
 
+func TestGridVertices(t *testing.T) {
+	testCases := []struct {
+		desc   string
+		change func(*graph.Grid) *graph.Grid
+		result [][2]int
+	}{
+		{
+			desc: "delete predictable",
+			change: func(g *graph.Grid) *graph.Grid {
+				g.DeleteVertices([2]int{0, 0})
+				return g
+			},
+			result: [][2]int{{0, 1}, {-1, 0}, {0, 0}, {1, 0}, {0, -1}},
+		},
+		{
+			desc: "delete predictable and create new",
+			change: func(g *graph.Grid) *graph.Grid {
+				g.DeleteVertices([2]int{0, 0})
+				if err := g.AddVertices([2]int{0, 0}); err != nil {
+					t.Error(err)
+				}
+				return g
+			},
+			result: [][2]int{{0, 1}, {-1, 0}, {0, 0}, {1, 0}, {0, -1}},
+		},
+		{
+			desc: "add edge",
+			change: func(g *graph.Grid) *graph.Grid {
+				g.DeleteVertices([2]int{0, 0})
+				if err := g.AddVertices([2]int{0, 0}); err != nil {
+					t.Error(err)
+				}
+				edges := [][2][2]int{
+					{{0, 0}, {0, 1}},
+					{{0, 0}, {-1, 0}},
+					{{0, 0}, {1, 0}},
+					{{0, 0}, {0, -1}},
+					{{0, 1}, {0, 0}},
+					{{-1, 0}, {0, 0}},
+					{{1, 0}, {0, 0}},
+					{{0, -1}, {0, 0}},
+				}
+				if err := g.AddEdges(edges...); err != nil {
+					t.Error(err)
+				}
+				return g
+			},
+			result: [][2]int{},
+		},
+		{
+			desc: "delete, create new and it make predictable",
+			change: func(g *graph.Grid) *graph.Grid {
+				g.DeleteVertices([2]int{0, 0})
+				if err := g.AddVertices([2]int{0, 0}); err != nil {
+					t.Error(err)
+				}
+				edges := [][2][2]int{
+					{{0, 0}, {0, 1}},
+					{{0, 0}, {-1, 0}},
+					{{0, 0}, {1, 0}},
+					{{0, 0}, {0, -1}},
+					{{0, 1}, {0, 0}},
+					{{-1, 0}, {0, 0}},
+					{{1, 0}, {0, 0}},
+					{{0, -1}, {0, 0}},
+				}
+				if err := g.AddEdges(edges...); err != nil {
+					t.Error(err)
+				}
+				return g
+			},
+			result: [][2]int{},
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			g := graph.NewGrid()
+			vertices := tC.change(g).Vertices()
+			if !reflect.DeepEqual(tC.result, vertices) {
+				t.Errorf("expected: %v, got: %v", tC.result, vertices)
+			}
+		})
+	}
+}
+
 func BenchmarkDeleteVertex(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		g := graph.NewGrid()
 
-		g.DeleteVertex([2]int{0, 0})
+		g.DeleteVertices([2]int{0, 0})
 	}
 }
