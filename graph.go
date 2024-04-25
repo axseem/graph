@@ -17,19 +17,24 @@ type Graph[K comparable] interface {
 	Adjacency(vertex K) []K
 }
 
+// Reader is the interface that defines graph data read methods.
 type Reader[K comparable] interface {
+	// Returns all vertices in the graph.
+	// Must not return nil.
+	// Infinite graph should return vertices that can't be procedural calculated.
 	Vertices() []K
 
-	// If graph is infinite should return -1
+	// Returns amount of vertices in graph.
+	// Infinite graph should return -1.
 	Order() int
 }
 
+// Reader is the interface that defines methods that allow modify graph data.
 type Writer[K comparable] interface {
-	AddVertex(vertex K) error
-	DeleteVertex(vertex K)
-	AddEdge(vertex1, vertex2 K) error
-	DeleteEdge(vertex1, vertex2 K)
-	Grow(int)
+	AddVertices(vertices ...K) error
+	DeleteVertices(vertices ...K)
+	AddEdges(edges ...[2]K) error
+	DeleteEdges(edges ...[2]K)
 }
 
 type GraphReadWriter[K comparable] interface {
