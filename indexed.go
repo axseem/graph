@@ -18,8 +18,11 @@ func NewIndexed[U unsigned]() *Indexed[U] {
 }
 
 func (g *Indexed[U]) Adjacency(vertex U) []U {
-	if len(g.vertices) < int(vertex) {
+	if len(g.vertices) <= int(vertex) {
 		return nil
+	}
+	if g.vertices[vertex] == nil {
+		return []U{}
 	}
 	return g.vertices[vertex]
 }
