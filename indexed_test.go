@@ -7,21 +7,21 @@ import (
 	"github.com/axseem/graph"
 )
 
-func TestMappedAdjacency(t *testing.T) {
+func TestIndexedAdjacency(t *testing.T) {
 	testCases := []struct {
 		desc   string
-		entry  int
-		result []int
+		entry  uint
+		result []uint
 	}{
 		{
 			desc:   "one neighbor",
 			entry:  0,
-			result: []int{1},
+			result: []uint{1},
 		},
 		{
 			desc:   "zero neighbors",
 			entry:  1,
-			result: []int{},
+			result: []uint{},
 		},
 		{
 			desc:   "nil vertex",
@@ -31,9 +31,9 @@ func TestMappedAdjacency(t *testing.T) {
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			g := graph.NewMapped[int]()
+			g := graph.NewIndexed[uint]()
 			g.AddVertices(0, 1)
-			g.AddEdges([2]int{0, 1})
+			g.AddEdges([2]uint{0, 1})
 
 			n := g.Adjacency(tC.entry)
 			if !reflect.DeepEqual(n, tC.result) {
