@@ -43,34 +43,12 @@ err := graph.BFS(g, 0, func(vertex, depth uint) bool {
 })
 ```
 
-<div class="columns">
-    <img class="column" src=".github/assets/showcase.svg"/>
-    <pre class="column" width="100%"><code>
+```
 0: depth: 0, neighbors: [1 2]
 1: depth: 1, neighbors: []
 2: depth: 1, neighbors: [3 4]
 3: depth: 2, neighbors: [5 6]
 4: depth: 2, neighbors: []
-    </code></pre>
-</div>
+```
 
-<style>
-.columns {
-    display: flex;
-}
-
-.column {
-    flex: 1;
-    width: 50%;
-}
-
-@media (max-width: 512px) {
-    .columns {
-        flex-direction: column;
-    }
-
-    .column {
-        width: 100%;
-    }
-}
-</style>
+<img class="column" src=".github/assets/showcase.svg" width=320/>
