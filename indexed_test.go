@@ -32,7 +32,7 @@ func TestIndexedAdjacency(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			g := graph.NewIndexed[uint]()
-			g.AddVertices(0, 1)
+			g.AddVertices(2)
 			g.AddEdges([2]uint{0, 1})
 
 			n := g.Adjacency(tC.entry)

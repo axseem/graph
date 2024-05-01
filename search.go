@@ -1,9 +1,5 @@
 package graph
 
-import (
-	"log"
-)
-
 // Each time a vertex is visited, the while function is triggered.
 // The function exits if while returns false or there are no more vertices.
 func BFS[K comparable](g Graph[K], entry K, while func(vertex K, depth uint) bool) error {
@@ -39,7 +35,6 @@ func BFS[K comparable](g Graph[K], entry K, while func(vertex K, depth uint) boo
 			depthCounter = 0
 			depthThreshold = uint(len(queue))
 		}
-		log.Println(depthThreshold, depthCounter)
 	}
 
 	return nil
