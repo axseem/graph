@@ -4,6 +4,12 @@ import (
 	"errors"
 )
 
+type Number interface {
+	~int | ~int8 | ~int16 | ~int32 | ~int64 |
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr |
+		~float32 | ~float64
+}
+
 var ErrNilVertex = errors.New("nil vertex")
 var ErrVertexExists = errors.New("vertex already exists")
 var ErrLoop = errors.New("simple graph can't contain loops")
@@ -15,6 +21,12 @@ type Graph[K comparable] interface {
 	// Empty slice: given vertex does not have neighbors;
 	// Slice with values: all neighbors of the vertex.
 	Adjacency(vertex K) []K
+}
+
+type WeightedGraph[K comparable, N Number] interface {
+	Graph[K]
+	VerticesValues(vertices ...K) []N
+	EdgesValues(vertices ...[2]K) []N
 }
 
 // Reader is the interface that defines graph data read methods.
